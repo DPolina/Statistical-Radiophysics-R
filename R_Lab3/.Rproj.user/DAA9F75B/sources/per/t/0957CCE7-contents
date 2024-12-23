@@ -1,0 +1,45 @@
+# 1. Загрузка файла с данными
+customers <- read.csv("Customers.csv", sep=";")
+
+# 2. Просмотр первых строк данных с помощью head() 
+head(customers)
+View(customers)
+
+# 3. Загрузка бибилиотеки dplyr 
+#install.packages("dplyr")
+library(dplyr)
+
+# 4. Преобразование категориальных переменных в факторы
+customers$gender <- as.factor(customers$gender)
+
+# 5. Удаление столбца customer_id и преобразование столбца Gender в числовые значения 
+customers <- customers %>% 
+  select(-customer_id) %>% # Удаление столбца customer_id 
+  mutate(gender = as.numeric(gender)) # Преобразование Gender в числовой формат 
+
+# Проверка изменений 
+head(customers)
+
+# 6. Просмотр структуры данных 
+str(customers)
+
+# 7. Метод локтя для определения количества кластеров:
+
+tot.withinss <- vector(mode="character", length=10) 
+for (i in 1:10){ 
+  customersCluster <- kmeans(iris[,1:4], center=i, nstart=20) 
+  tot.withinss[i] <- customersCluster$tot.withinss 
+} 
+customersCluster
+plot(1:10, tot.withinss, type="b", pch=19)
+
+# 8. Для функции set.seed() установить аргумент, равный 42
+
+set.seed(42)
+# Функция set.seed() используется для того, чтобы результаты анализа были воспроизводимы. 
+# Если мы запустим этот код несколько раз, результаты будут одинаковыми, так как 
+# генератор случайных чисел будет всегда начинать с одного и того же значения.
+
+# 9. Кластеризация методом k-средних; 
+
+

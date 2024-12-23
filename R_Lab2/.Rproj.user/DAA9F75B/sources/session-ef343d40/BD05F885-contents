@@ -1,0 +1,124 @@
+# Classification
+
+risk <- read.csv("Risk.csv")
+
+head(risk)
+View(risk)
+
+library(RColorBrewer)
+palette <- brewer.pal(3, "Set2")
+
+risk$Gender <- as.factor(risk$Gender)
+risk$State <- as.factor(risk$State)
+risk$Risk <- as.factor(risk$Risk)
+
+# Diagram
+plot( 
+  x = risk[1:8],  
+  col = palette[as.numeric(risk$Risk)], 
+  pch = 10)
+
+# BMI vs Age
+plot( 
+  x = risk$BMI,  
+  y = risk$Age,  
+  col = palette[as.numeric(risk$Risk)], 
+  pch = 19) 
+legend( 
+  x = "topright", 
+  legend = levels(risk$Risk), 
+  col = palette, 
+  pch = 16 
+) 
+
+set.seed(42)
+
+# Train/Test
+library(caret)
+indexes <- createDataPartition(risk$Risk, p = 0.8, list = FALSE)
+
+train <- risk[indexes, ]
+test <- risk[-indexes, ]
+
+nrow(train)
+nrow(test)
+
+#KNN
+knnModel <- knn3(
+  formula = Risk ~ Age + BMI + Gender + State.Rate,
+  data = train,
+  k = 3
+)
+
+knnPredictions <- predict(
+  object = knnModel, 
+  newdata = test, 
+  type = "class")
+
+table( 
+  x = knnPredictions,  
+  y = test$Risk) 
+
+knnMatrix <- confusionMatrix(
+  data = knnPredictions, 
+  reference = test$Risk)
+print(knnMatrix)
+#accuracy <- knnMatrix$overall['Accuracy']
+
+
+#Tree
+library(tree) 
+treeModel <- tree(
+  formula = Risk ~ Age + BMI + Gender + State.Rate, 
+  data = train, 
+  method = "class")
+
+summary(treeModel)
+
+plot(treeModel) 
+text(treeModel) 
+
+treePredictions <- predict(
+  object = treeModel, 
+  data = test, 
+  type = "class")
+
+treeMatrix <- confusionMatrix(
+  data = treePredictions, 
+  reference = test$Risk)
+print(treeMatrix)
+
+#Neural Networks 
+library(nnet)
+
+neuralModel <- nnet( 
+  formula = Risk ~ Age + BMI + Gender + State.Rate, 
+  data = train, 
+  size = 10, 
+  decay = 0.00001, 
+  maxit = 500)
+
+plot(neuralModel)
+text(neuralModel) 
+
+library(NeuralNetTools) 
+plotnet(neuralModel, alpha = 0.5)
+
+neuralPredictions <- predict( 
+  object = neuralModel, 
+  data = test[, 1:4], 
+  type = "class")
+
+neuralMatrix <- confusionMatrix( 
+  data = as.factor(neuralPredictions),  
+  reference = test$Gender) 
+print(neuralMatrix)
+
+print(knnMatrix$overall[1]) 
+print(treeMatrix$overall[1])
+print(neuralMatrix$overall[1])
+
+
+
+
+
